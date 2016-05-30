@@ -1,14 +1,9 @@
 package logging
 
 import (
-	"os"
-	"path"
-	"syscall"
-
 	"github.com/Sirupsen/logrus"
 	"github.com/Sirupsen/logrus/formatters/logstash"
 	"github.com/go-errors/errors"
-	"gopkg.in/codegangsta/cli.v2"
 )
 
 type logrusLogger struct {
@@ -16,34 +11,33 @@ type logrusLogger struct {
 	fields map[string]interface{}
 }
 
-func NewLogrusLogger(ctx *cli.Context) Logger {
-	logFile := ctx.String("log-file")
-	if logFile != "" {
-		if err := os.MkdirAll(path.Dir(logFile), 0755); err != nil {
-			logrus.Errorf("Failed to create path %s: %s", path.Dir(logFile), err.Error())
-		} else {
-			file, err := os.OpenFile(logFile, syscall.O_CREAT|syscall.O_APPEND|syscall.O_WRONLY, 0644)
-			if err != nil {
-				logrus.Errorf("Failed to open log file %s: %s", logFile, err.Error())
-			} else {
-				logrus.SetOutput(file)
-			}
-		}
-	}
-	switch ctx.String("log-format") {
+func NewLogrusLogger(options Options) Logger {
+	backend := logrus.New()
+	backend.Out = options.GetOutput()
+
+	switch options.LogFormat {
 	case "json":
-		logrus.SetFormatter(&logrus.JSONFormatter{})
+		backend.Formatter = &logrus.JSONFormatter{}
 	case "logstash":
-		logrus.SetFormatter(&logstash.LogstashFormatter{})
+		backend.Formatter = &logstash.LogstashFormatter{}
 	default:
-		logrus.SetFormatter(&logrus.TextFormatter{})
+		backend.Formatter = &logrus.TextFormatter{}
 	}
-	if ctx.Bool("debug") {
-		logrus.SetLevel(logrus.DebugLevel)
+	switch options.Level {
+	case Fatal:
+		backend.Level = logrus.FatalLevel
+	case Error:
+		backend.Level = logrus.ErrorLevel
+	case Warn:
+		backend.Level = logrus.WarnLevel
+	case Info:
+		backend.Level = logrus.InfoLevel
+	case Debug:
+		backend.Level = logrus.DebugLevel
 	}
 
 	return &logrusLogger{
-		logger: logrus.StandardLogger(),
+		logger: backend,
 	}
 }
 

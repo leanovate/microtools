@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/leanovate/microtools/routing"
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/untoldwind/routing"
 )
 
 func TestSequence(t *testing.T) {

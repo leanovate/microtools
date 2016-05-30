@@ -2,37 +2,35 @@ package logging
 
 import (
 	"fmt"
-	"github.com/go-errors/errors"
 	"io"
 	"io/ioutil"
 	"log"
 	"strings"
-)
 
-const (
-	Fatal = iota
-	Error
-	Warn
-	Info
-	Debug
+	"github.com/go-errors/errors"
 )
 
 type loggerSimple struct {
 	logger *log.Logger
-	level  int
+	level  Level
 	out    io.Writer
 }
 
-func NewSimpleLogger(out io.Writer, level int) Logger {
+func NewSimpleLogger(options Options) Logger {
+	out := options.GetOutput()
 	return &loggerSimple{
 		logger: log.New(out, "", log.LstdFlags),
-		level:  level,
+		level:  options.Level,
 		out:    out,
 	}
 }
 
 func NewSimpleLoggerNull() Logger {
-	return NewSimpleLogger(ioutil.Discard, Fatal)
+	return &loggerSimple{
+		logger: log.New(ioutil.Discard, "", log.LstdFlags),
+		level:  Fatal,
+		out:    ioutil.Discard,
+	}
 }
 
 func (l *loggerSimple) ErrorErr(err error) {
