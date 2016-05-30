@@ -1,0 +1,10 @@
+sudo: false
+language: go
+go:
+- 1.5
+- 1.6
+script: make all coverage
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov

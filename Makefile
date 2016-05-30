@@ -16,6 +16,15 @@ test:
 	@echo "--> Running tests"
 	@go test -v ./rest/... ./routing/... ./logging/...
 
+coverage:
+	@echo "--> Running tests with coverage"
+	@echo "" > coverage.txt
+	for pkg in $(shell go list ./rest/... ./routing/... ./logging/...); do \
+          (go test -coverprofile=.pkg.coverage -covermode=atomic -v $$pkg && \
+          cat .pkg.coverage >> coverage.txt) || exit 1; \
+  done
+	@rm .pkg.coverage
+
 godepssave:
 	@echo "--> Godeps save"
 	@go get github.com/tools/godep
