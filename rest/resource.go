@@ -13,7 +13,7 @@ type Resource interface {
 	Update(request *http.Request) (interface{}, error)
 	Delete(request *http.Request) (interface{}, error)
 
-	SubResources(name string) (Resources, error)
+	SubResource(name string) (routing.Matcher, error)
 }
 
 type ResourceBase struct{}
@@ -34,18 +34,18 @@ func (ResourceBase) Delete(request *http.Request) (interface{}, error) {
 	return nil, MethodNotAllowed
 }
 
-func (ResourceBase) SubResources(name string) (Resources, error) {
+func (ResourceBase) SubResource(name string) (routing.Matcher, error) {
 	return nil, NotFound
 }
 
 func ResourceMatcher(resource Resource) routing.Matcher {
 	return routing.Sequence(
 		routing.StringPart(func(name string) routing.Matcher {
-			subResources, err := resource.SubResources(name)
+			subResource, err := resource.SubResource(name)
 			if err != nil {
 				return HttpErrorMatcher(WrapError(err))
 			}
-			return ResourcesMatcher("", subResources)
+			return subResource
 		}),
 		routing.EndSeq(
 			routing.GET(restHandler(resource.Get)),
