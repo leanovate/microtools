@@ -7,7 +7,7 @@ import (
 )
 
 type Resource interface {
-	Location() string
+	Self() Link
 	Get(request *http.Request) (interface{}, error)
 	Patch(request *http.Request) (interface{}, error)
 	Update(request *http.Request) (interface{}, error)

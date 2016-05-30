@@ -11,9 +11,17 @@ import (
 	"testing"
 )
 
+type minimalResources struct {
+	rest.ResourcesBase
+}
+
+func (minimalResources) Self() rest.Link {
+	return rest.SimpleLink("")
+}
+
 func TestResources(t *testing.T) {
 	Convey("Given base resources", t, func() {
-		matcher := rest.ResourcesMatcher("/v1", rest.ResourcesBase{})
+		matcher := rest.ResourcesMatcher("/v1", minimalResources{})
 
 		Convey("When GET /v1", func() {
 			request, _ := http.NewRequest("GET", "/v1", nil)

@@ -15,8 +15,8 @@ type minimalResource struct {
 	rest.ResourceBase
 }
 
-func (minimalResource) Location() string {
-	return ""
+func (minimalResource) Self() rest.Link {
+	return rest.SimpleLink("")
 }
 
 func TestResource(t *testing.T) {

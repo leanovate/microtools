@@ -7,6 +7,7 @@ import (
 )
 
 type Resources interface {
+	Self() Link
 	Create(request *http.Request) (Resource, error)
 	List(request *http.Request) (interface{}, error)
 

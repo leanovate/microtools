@@ -7,10 +7,10 @@ import (
 )
 
 type HTTPError struct {
-	Code    int    `json:"code"`
-	Type    string `json:"type"`
-	Message string `json:"message"`
-	Details string `json:"details,omitempty"`
+	Code    int    `json:"code" xml:"code"`
+	Type    string `json:"type" xml:"type"`
+	Message string `json:"message" xml:"message"`
+	Details string `json:"details,omitempty" xml:"details,omitempty"`
 }
 
 func (e *HTTPError) Error() string {

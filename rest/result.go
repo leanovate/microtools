@@ -83,12 +83,12 @@ func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			switch result.(type) {
 			case *Result:
 				result.(*Result).
-					AddHeader("location", resource.Location()).
+					AddHeader("location", resource.Self().Href).
 					WithStatus(201).
 					Send(resp, encoder)
 			default:
 				BuildResult().
-					AddHeader("location", resource.Location()).
+					AddHeader("location", resource.Self().Href).
 					WithStatus(201).
 					WithBody(result).
 					Send(resp, encoder)
