@@ -60,15 +60,14 @@ func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	if err == nil {
 		switch result.(type) {
 		case *Result:
-			result.(*Result).Send(resp, encoder)
+			err = result.(*Result).Send(resp, encoder)
 		default:
-			BuildResult().WithBody(result).Send(resp, encoder)
-		}
-		if err == nil {
-			return
+			err = BuildResult().WithBody(result).Send(resp, encoder)
 		}
 	}
-	WrapError(err).Send(resp, encoder)
+	if err != nil {
+		WrapError(err).Send(resp, encoder)
+	}
 }
 
 type createHandler func(*http.Request) (Resource, error)
@@ -78,22 +77,26 @@ func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	var err error
 	resource, err := h(req)
 	if err == nil {
-		result, err := resource.Get(req)
-		if err == nil {
-			switch result.(type) {
-			case *Result:
-				result.(*Result).
-					AddHeader("location", resource.Self().Href).
-					WithStatus(201).
-					Send(resp, encoder)
-			default:
-				BuildResult().
-					AddHeader("location", resource.Self().Href).
-					WithStatus(201).
-					WithBody(result).
-					Send(resp, encoder)
+		if resource != nil {
+			result, err := resource.Get(req)
+			if err == nil {
+				switch result.(type) {
+				case *Result:
+					err = result.(*Result).
+						AddHeader("location", resource.Self().Href).
+						WithStatus(201).
+						Send(resp, encoder)
+				default:
+					err = BuildResult().
+						AddHeader("location", resource.Self().Href).
+						WithStatus(201).
+						WithBody(result).
+						Send(resp, encoder)
+				}
 			}
 		}
 	}
-	WrapError(err).Send(resp, encoder)
+	if err != nil {
+		WrapError(err).Send(resp, encoder)
+	}
 }
