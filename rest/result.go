@@ -1,8 +1,11 @@
 package rest
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"runtime/debug"
 )
 
 type Result struct {
@@ -63,6 +66,12 @@ type restHandler func(request *http.Request) (interface{}, error)
 
 func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	encoder := StdResponseEncoderChooser(req)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintln(os.Stderr, string(debug.Stack()))
+			InternalServerError(fmt.Errorf("Paniced: %v", r)).Send(resp, encoder)
+		}
+	}()
 	var err error
 	result, err := h(req)
 	if err == nil {
@@ -82,6 +91,12 @@ type createHandler func(*http.Request) (Resource, error)
 
 func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	encoder := StdResponseEncoderChooser(req)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintln(os.Stderr, string(debug.Stack()))
+			InternalServerError(fmt.Errorf("Paniced: %v", r)).Send(resp, encoder)
+		}
+	}()
 	var err error
 	resource, err := h(req)
 	if err == nil {
