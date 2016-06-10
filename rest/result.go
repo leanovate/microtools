@@ -11,8 +11,16 @@ type Result struct {
 	Body   interface{}
 }
 
-func BuildResult() *Result {
-	return &Result{Status: 200, Header: make(http.Header)}
+func Ok() *Result {
+	return Status(200)
+}
+
+func Created() *Result {
+	return Status(201)
+}
+
+func Status(status int) *Result {
+	return &Result{Status: status, Header: make(http.Header)}
 }
 
 func (r *Result) WithStatus(status int) *Result {
@@ -62,7 +70,7 @@ func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		case *Result:
 			err = result.(*Result).Send(resp, encoder)
 		default:
-			err = BuildResult().WithBody(result).Send(resp, encoder)
+			err = Ok().WithBody(result).Send(resp, encoder)
 		}
 	}
 	if err != nil {
@@ -87,9 +95,8 @@ func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 						WithStatus(201).
 						Send(resp, encoder)
 				default:
-					err = BuildResult().
+					err = Created().
 						AddHeader("location", resource.Self().Href).
-						WithStatus(201).
 						WithBody(result).
 						Send(resp, encoder)
 				}
