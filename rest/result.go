@@ -98,10 +98,12 @@ func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}()
 	var err error
-	resource, err := h(req)
+	var resource Resource
+	resource, err = h(req)
 	if err == nil {
 		if resource != nil {
-			result, err := resource.Get(req)
+			var result interface{}
+			result, err = resource.Get(req)
 			if err == nil {
 				switch result.(type) {
 				case *Result:
