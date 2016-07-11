@@ -57,6 +57,9 @@ func (r *Result) Send(resp http.ResponseWriter, encoder ResponseEncoder) error {
 	case io.Reader:
 		_, err := io.Copy(resp, r.Body.(io.Reader))
 		return err
+	case []byte:
+		_, err := resp.Write(r.Body.([]byte))
+		return err
 	default:
 		return encoder(resp, r.Body)
 	}
