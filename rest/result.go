@@ -1,31 +1,35 @@
 package rest
 
 import (
-	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"runtime/debug"
 )
 
+// Result allows a better control of the response of a REST operation.
+// This should be used if a REST handler needs to modify HTTP headers or
+// has a specific status.
 type Result struct {
 	Status int
 	Header http.Header
 	Body   interface{}
 }
 
+// Ok creates an OK (200) response.
 func Ok() *Result {
 	return Status(200)
 }
 
+// Created creates a CREATED (201) response.
 func Created() *Result {
 	return Status(201)
 }
 
+// Status creates a response with a specific HTTP status
 func Status(status int) *Result {
 	return &Result{Status: status, Header: make(http.Header)}
 }
 
+// WithStatus modifies the HTTP status of a response
 func (r *Result) WithStatus(status int) *Result {
 	r.Status = status
 	return r
@@ -50,80 +54,27 @@ func (r *Result) Send(resp http.ResponseWriter, encoder ResponseEncoder) error {
 			resp.Header().Add(key, value)
 		}
 	}
-	resp.WriteHeader(r.Status)
 	switch r.Body.(type) {
 	case nil:
+		resp.WriteHeader(r.Status)
 		return nil
 	case io.Reader:
+		resp.WriteHeader(r.Status)
 		_, err := io.Copy(resp, r.Body.(io.Reader))
 		return err
+	case io.WriterTo:
+		resp.WriteHeader(r.Status)
+		_, err := (r.Body.(io.WriterTo)).WriteTo(resp)
+		return err
 	case []byte:
+		resp.WriteHeader(r.Status)
 		_, err := resp.Write(r.Body.([]byte))
 		return err
 	default:
-		return encoder(resp, r.Body)
-	}
-}
-
-type restHandler func(request *http.Request) (interface{}, error)
-
-func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	encoder := StdResponseEncoderChooser(req)
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Fprintln(os.Stderr, string(debug.Stack()))
-			InternalServerError(fmt.Errorf("Paniced: %v", r)).Send(resp, encoder)
+		if resp.Header().Get("Content-Type") == "" {
+			resp.Header().Set("Content-Type", encoder.ContentType())
 		}
-	}()
-	var err error
-	result, err := h(req)
-	if err == nil {
-		switch result.(type) {
-		case *Result:
-			err = result.(*Result).Send(resp, encoder)
-		default:
-			err = Ok().WithBody(result).Send(resp, encoder)
-		}
-	}
-	if err != nil {
-		WrapError(err).Send(resp, encoder)
-	}
-}
-
-type createHandler func(*http.Request) (Resource, error)
-
-func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	encoder := StdResponseEncoderChooser(req)
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Fprintln(os.Stderr, string(debug.Stack()))
-			InternalServerError(fmt.Errorf("Paniced: %v", r)).Send(resp, encoder)
-		}
-	}()
-	var err error
-	var resource Resource
-	resource, err = h(req)
-	if err == nil {
-		if resource != nil {
-			var result interface{}
-			result, err = resource.Get(req)
-			if err == nil {
-				switch result.(type) {
-				case *Result:
-					err = result.(*Result).
-						AddHeader("location", resource.Self().Href).
-						WithStatus(201).
-						Send(resp, encoder)
-				default:
-					err = Created().
-						AddHeader("location", resource.Self().Href).
-						WithBody(result).
-						Send(resp, encoder)
-				}
-			}
-		}
-	}
-	if err != nil {
-		WrapError(err).Send(resp, encoder)
+		resp.WriteHeader(r.Status)
+		return encoder.Encode(resp, r.Body)
 	}
 }

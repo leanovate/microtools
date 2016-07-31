@@ -8,13 +8,32 @@ import (
 	"strings"
 )
 
-type ResponseEncoder func(output io.Writer, data interface{}) error
+type ResponseEncoder interface {
+	ContentType() string
+	Encode(output io.Writer, data interface{}) error
+}
 
-func JsonResponseEncoder(output io.Writer, data interface{}) error {
+type jsonResponseEncoder struct{}
+
+var JsonResponseEncoder jsonResponseEncoder
+
+func (jsonResponseEncoder) ContentType() string {
+	return "application/json"
+}
+
+func (jsonResponseEncoder) Encode(output io.Writer, data interface{}) error {
 	return json.NewEncoder(output).Encode(data)
 }
 
-func XmlResponseEncoder(output io.Writer, data interface{}) error {
+type xmlResponseEncoder struct{}
+
+var XmlResponseEncoder xmlResponseEncoder
+
+func (xmlResponseEncoder) ContentType() string {
+	return "text/xml"
+}
+
+func (xmlResponseEncoder) Encode(output io.Writer, data interface{}) error {
 	return xml.NewEncoder(output).Encode(data)
 }
 

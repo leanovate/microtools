@@ -19,7 +19,7 @@ func (e *HTTPError) Error() string {
 
 func (e *HTTPError) Send(response http.ResponseWriter, encoder ResponseEncoder) {
 	response.WriteHeader(e.Code)
-	if err := encoder(response, e); err != nil {
+	if err := encoder.Encode(response, e); err != nil {
 		response.Write([]byte(e.Message))
 	}
 }
