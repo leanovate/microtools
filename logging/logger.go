@@ -37,9 +37,13 @@ type Options struct {
 	LogFile   string
 	LogFormat string
 	Level     Level
+	Output    io.Writer
 }
 
 func (o Options) GetOutput() io.Writer {
+	if o.Output != nil {
+		return o.Output
+	}
 	if o.LogFile != "" {
 		if err := os.MkdirAll(path.Dir(o.LogFile), 0755); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to create path %s: %s", path.Dir(o.LogFile), err.Error())

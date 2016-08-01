@@ -30,3 +30,8 @@ godepssave:
 	@go get github.com/tools/godep
 	@go build -v -o bin/godep github.com/tools/godep
 	@bin/godep save ./...
+
+#genmocks:
+#	@echo "--> Generate mocks"
+#	@go build -v -o bin/mockgen github.com/golang/mock/mockgen
+#	bin/mockgen -destination=./routing/logger_mock_test.go -package routing_test github.com/leanovate/microtools/logging Logger 

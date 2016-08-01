@@ -8,13 +8,13 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.9.0-17-ga26f435",
-			"Rev": "a26f43589d737684363ff856c5a0f9f24b946510"
+			"Comment": "v0.10.0-18-g6d9ae30",
+			"Rev": "6d9ae300aaf85d6acd2e5424081c7fcddb21dab8"
 		},
 		{
 			"ImportPath": "github.com/Sirupsen/logrus/formatters/logstash",
-			"Comment": "v0.9.0-17-ga26f435",
-			"Rev": "a26f43589d737684363ff856c5a0f9f24b946510"
+			"Comment": "v0.10.0-18-g6d9ae30",
+			"Rev": "6d9ae300aaf85d6acd2e5424081c7fcddb21dab8"
 		},
 		{
 			"ImportPath": "github.com/go-errors/errors",
@@ -22,7 +22,7 @@
 		},
 		{
 			"ImportPath": "github.com/golang/mock/gomock",
-			"Rev": "06883d979f10cc178f2716846215c8cf90f9e363"
+			"Rev": "bd3c8e81be01eef76d4b503f5e687d2d1354d2d9"
 		},
 		{
 			"ImportPath": "github.com/gopherjs/gopherjs/js",
@@ -62,10 +62,6 @@
 			"ImportPath": "github.com/smartystreets/goconvey/convey/reporting",
 			"Comment": "1.6.1-2-g99f2b1e",
 			"Rev": "99f2b1e01343c8bc2d9d12f1194d2d68ce18b063"
-		},
-		{
-			"ImportPath": "github.com/untoldwind/routing",
-			"Rev": "b9c89998b829165aa8e764a095853949a6e3c7e3"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
