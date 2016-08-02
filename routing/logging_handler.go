@@ -8,8 +8,9 @@ import (
 )
 
 type loggingResponseWriter struct {
-	status     int
-	underlying http.ResponseWriter
+	status        int
+	responseBytes int
+	underlying    http.ResponseWriter
 }
 
 func (l *loggingResponseWriter) Header() http.Header {
@@ -17,7 +18,11 @@ func (l *loggingResponseWriter) Header() http.Header {
 }
 
 func (l *loggingResponseWriter) Write(bytes []byte) (int, error) {
-	return l.underlying.Write(bytes)
+	n, err := l.underlying.Write(bytes)
+	if err != nil {
+		l.responseBytes += n
+	}
+	return n, err
 }
 
 func (l *loggingResponseWriter) WriteHeader(status int) {
@@ -42,7 +47,7 @@ func NewLoggingHandler(delegate http.Handler, logger logging.Logger) http.Handle
 func (l *LoggingHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	start := time.Now()
 	loggingResp := &loggingResponseWriter{
-		status:     200,
+		status:     -1,
 		underlying: resp,
 	}
 	l.delegate.ServeHTTP(loggingResp, req)
@@ -52,6 +57,7 @@ func (l *LoggingHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) 
 		"status": loggingResp.status,
 		"time":   elapsed.String(),
 		"millis": float64(elapsed.Nanoseconds()) / 1000000.0,
+		"bytes":  loggingResp.responseBytes,
 	})
 	if loggingResp.status < 300 {
 		log.Info("Request: Success")
