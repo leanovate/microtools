@@ -53,6 +53,7 @@ func (l *LoggingHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) 
 	l.delegate.ServeHTTP(loggingResp, req)
 	elapsed := time.Since(start)
 	log := l.logger.WithContext(map[string]interface{}{
+		"method": req.Method,
 		"uri":    req.RequestURI,
 		"status": loggingResp.status,
 		"time":   elapsed.String(),
