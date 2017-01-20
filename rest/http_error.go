@@ -24,6 +24,15 @@ func (e *HTTPError) Send(response http.ResponseWriter, encoder ResponseEncoder) 
 	}
 }
 
+func (e *HTTPError) WithDetails(details string) *HTTPError {
+	return &HTTPError{
+		Code:    e.Code,
+		Type:    e.Type,
+		Message: e.Message,
+		Details: details,
+	}
+}
+
 func HttpErrorMatcher(httpError *HTTPError) routing.Matcher {
 	return func(remainingPath string, resp http.ResponseWriter, req *http.Request) bool {
 		encoder := StdResponseEncoderChooser(req)
@@ -69,6 +78,12 @@ var MethodNotAllowed = &HTTPError{
 	Code:    405,
 	Type:    "https://httpstatus.es/405",
 	Message: "Method not allowed",
+}
+
+var Conflict = &HTTPError{
+	Code:    409,
+	Type:    "https://httpstatus.es/409",
+	Message: "Conflict",
 }
 
 func InternalServerError(err error) *HTTPError {
