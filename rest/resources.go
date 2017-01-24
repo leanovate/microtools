@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/leanovate/microtools/routing"
@@ -11,7 +12,7 @@ type Resources interface {
 	Create(request *http.Request) (Resource, error)
 	List(request *http.Request) (interface{}, error)
 
-	FindById(id string) (Resource, error)
+	FindById(id string) (interface{}, error)
 }
 
 type ResourcesBase struct{}
@@ -24,18 +25,25 @@ func (ResourcesBase) List(*http.Request) (interface{}, error) {
 	return nil, MethodNotAllowed
 }
 
-func (ResourcesBase) FindById(id string) (Resource, error) {
+func (ResourcesBase) FindById(id string) (interface{}, error) {
 	return nil, NotFound
 }
 
 func ResourcesMatcher(prefix string, collection Resources) routing.Matcher {
 	return routing.PrefixSeq(prefix,
 		routing.StringPart(func(id string) routing.Matcher {
-			resource, err := collection.FindById(id)
+			result, err := collection.FindById(id)
 			if err != nil {
 				return HttpErrorMatcher(WrapError(err))
 			}
-			return ResourceMatcher(resource)
+			switch resource := (result).(type) {
+			case Resource:
+				return ResourceMatcher(resource)
+			case Resources:
+				return ResourcesMatcher("", resource)
+			default:
+				return HttpErrorMatcher(InternalServerError(errors.New("Invalid result")))
+			}
 		}),
 		routing.EndSeq(
 			routing.GET(restHandler(collection.List)),
