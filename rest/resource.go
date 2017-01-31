@@ -7,6 +7,7 @@ import (
 )
 
 type Resource interface {
+	BeforeFilter(resp http.ResponseWriter, req *http.Request) bool
 	Self() Link
 	Get(request *http.Request) (interface{}, error)
 	Patch(request *http.Request) (interface{}, error)
@@ -17,6 +18,10 @@ type Resource interface {
 }
 
 type ResourceBase struct{}
+
+func (ResourceBase) BeforeFilter(resp http.ResponseWriter, req *http.Request) bool {
+	return true
+}
 
 func (ResourceBase) Get(request *http.Request) (interface{}, error) {
 	return nil, MethodNotAllowed
@@ -38,13 +43,25 @@ func (ResourceBase) SubResources() routing.Matcher {
 	return HttpErrorMatcher(NotFound)
 }
 
+type LimitedResource struct {
+	ResourceBase
+	RequestSizeLimit int64
+}
+
+func (r LimitedResource) BeforeFilter(resp http.ResponseWriter, req *http.Request) bool {
+	if req.Body != nil {
+		req.Body = http.MaxBytesReader(resp, req.Body, r.RequestSizeLimit)
+	}
+	return true
+}
+
 func ResourceMatcher(resource Resource) routing.Matcher {
 	return routing.Sequence(
 		routing.EndSeq(
-			routing.GET(restHandler(resource.Get)),
-			routing.PUT(restHandler(resource.Update)),
-			routing.PATCH(restHandler(resource.Patch)),
-			routing.DELETE(restHandler(resource.Delete)),
+			routing.GET(restHandler{before: resource.BeforeFilter, handler: resource.Get}),
+			routing.PUT(restHandler{before: resource.BeforeFilter, handler: resource.Update}),
+			routing.PATCH(restHandler{before: resource.BeforeFilter, handler: resource.Patch}),
+			routing.DELETE(restHandler{before: resource.BeforeFilter, handler: resource.Delete}),
 			HttpErrorMatcher(MethodNotAllowed),
 		),
 		resource.SubResources(),

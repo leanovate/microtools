@@ -8,6 +8,7 @@ import (
 )
 
 type Resources interface {
+	BeforeFilter(resp http.ResponseWriter, req *http.Request) bool
 	Self() Link
 	Create(request *http.Request) (Resource, error)
 	List(request *http.Request) (interface{}, error)
@@ -16,6 +17,10 @@ type Resources interface {
 }
 
 type ResourcesBase struct{}
+
+func (ResourcesBase) BeforeFilter(resp http.ResponseWriter, req *http.Request) bool {
+	return true
+}
 
 func (ResourcesBase) Create(*http.Request) (Resource, error) {
 	return nil, MethodNotAllowed
@@ -27,6 +32,18 @@ func (ResourcesBase) List(*http.Request) (interface{}, error) {
 
 func (ResourcesBase) FindById(id string) (interface{}, error) {
 	return nil, NotFound
+}
+
+type LimitedResources struct {
+	ResourcesBase
+	RequestSizeLimit int64
+}
+
+func (r LimitedResources) BeforeFilter(resp http.ResponseWriter, req *http.Request) bool {
+	if req.Body != nil {
+		req.Body = http.MaxBytesReader(resp, req.Body, r.RequestSizeLimit)
+	}
+	return true
 }
 
 func ResourcesMatcher(prefix string, collection Resources) routing.Matcher {
@@ -46,8 +63,8 @@ func ResourcesMatcher(prefix string, collection Resources) routing.Matcher {
 			}
 		}),
 		routing.EndSeq(
-			routing.GET(restHandler(collection.List)),
-			routing.POST(createHandler(collection.Create)),
+			routing.GET(restHandler{before: collection.BeforeFilter, handler: collection.List}),
+			routing.POST(createHandler{before: collection.BeforeFilter, handler: collection.Create}),
 			HttpErrorMatcher(MethodNotAllowed),
 		),
 	)

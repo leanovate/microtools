@@ -7,7 +7,10 @@ import (
 	"runtime/debug"
 )
 
-type restHandler func(request *http.Request) (interface{}, error)
+type restHandler struct {
+	before  func(resp http.ResponseWriter, req *http.Request) bool
+	handler func(request *http.Request) (interface{}, error)
+}
 
 func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	encoder := StdResponseEncoderChooser(req)
@@ -18,7 +21,10 @@ func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}()
 	var err error
-	result, err := h(req)
+	if h.before != nil && !h.before(resp, req) {
+		return
+	}
+	result, err := h.handler(req)
 	if err == nil {
 		switch result.(type) {
 		case *Result:
@@ -32,7 +38,10 @@ func (h restHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-type createHandler func(*http.Request) (Resource, error)
+type createHandler struct {
+	before  func(resp http.ResponseWriter, req *http.Request) bool
+	handler func(*http.Request) (Resource, error)
+}
 
 func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	encoder := StdResponseEncoderChooser(req)
@@ -43,8 +52,11 @@ func (h createHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}()
 	var err error
+	if h.before != nil && !h.before(resp, req) {
+		return
+	}
 	var resource Resource
-	resource, err = h(req)
+	resource, err = h.handler(req)
 	if err == nil {
 		if resource != nil {
 			var result interface{}

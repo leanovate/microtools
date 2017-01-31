@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/leanovate/microtools/routing"
@@ -14,7 +15,10 @@ type HTTPError struct {
 }
 
 func (e *HTTPError) Error() string {
-	return e.Details
+	if e.Details != "" {
+		return fmt.Sprintf("%s (%d): %s", e.Message, e.Code, e.Details)
+	}
+	return fmt.Sprintf("%s (%d)", e.Message, e.Code)
 }
 
 func (e *HTTPError) Send(response http.ResponseWriter, encoder ResponseEncoder) {
