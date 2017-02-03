@@ -1,9 +1,11 @@
 package logging
 
 import (
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/Sirupsen/logrus/formatters/logstash"
-	"github.com/go-errors/errors"
+	"github.com/pkg/errors"
 )
 
 type logrusLogger struct {
@@ -43,8 +45,16 @@ func NewLogrusLogger(options Options) Logger {
 
 func (l *logrusLogger) ErrorErr(err error) {
 	if l.logger.Level >= logrus.ErrorLevel {
-		richErr := errors.Wrap(err, 1)
-		l.logger.WithFields(l.fields).Errorf(richErr.ErrorStack())
+		switch richErr := err.(type) {
+		case fmt.Formatter:
+			l.logger.WithFields(l.fields).Errorf("%+v", richErr)
+		case simpleStackTracer:
+			l.logger.WithFields(l.fields).Errorf(richErr.ErrorStack())
+		default:
+			wrapped := errors.Wrap(err, err.Error())
+
+			l.logger.WithFields(l.fields).Errorf("%+v", wrapped)
+		}
 	}
 }
 

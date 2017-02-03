@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/go-errors/errors"
+	"github.com/pkg/errors"
 )
 
 type loggerSimple struct {
@@ -35,9 +35,16 @@ func NewSimpleLoggerNull() Logger {
 
 func (l *loggerSimple) ErrorErr(err error) {
 	if l.level >= Error {
-		richErr := errors.Wrap(err, 1)
+		switch richErr := err.(type) {
+		case fmt.Formatter:
+			l.logger.Printf("%+v", richErr)
+		case simpleStackTracer:
+			l.logger.Print(richErr.ErrorStack())
+		default:
+			wrapped := errors.Wrap(err, err.Error())
 
-		l.logger.Print(richErr.ErrorStack())
+			l.logger.Printf("%+v", wrapped)
+		}
 	}
 }
 

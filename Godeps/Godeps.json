@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/leanovate/microtools",
-	"GoVersion": "go1.6",
-	"GodepVersion": "v70",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v77",
 	"Packages": [
 		"./..."
 	],
@@ -17,10 +17,6 @@
 			"Rev": "6d9ae300aaf85d6acd2e5424081c7fcddb21dab8"
 		},
 		{
-			"ImportPath": "github.com/go-errors/errors",
-			"Rev": "a41850380601eeb43f4350f7d17c6bbd8944aaf8"
-		},
-		{
 			"ImportPath": "github.com/golang/mock/gomock",
 			"Rev": "bd3c8e81be01eef76d4b503f5e687d2d1354d2d9"
 		},
@@ -32,6 +28,11 @@
 		{
 			"ImportPath": "github.com/jtolds/gls",
 			"Rev": "8ddce2a84170772b95dd5d576c48d517b22cac63"
+		},
+		{
+			"ImportPath": "github.com/pkg/errors",
+			"Comment": "v0.8.0-2-g248dadf",
+			"Rev": "248dadf4e9068a0b3e79f02ed0a610d935de5302"
 		},
 		{
 			"ImportPath": "github.com/smartystreets/assertions",

@@ -72,3 +72,7 @@ func NewLogger(options Options) Logger {
 	}
 	return NewLogrusLogger(options)
 }
+
+type simpleStackTracer interface {
+	ErrorStack() string
+}
