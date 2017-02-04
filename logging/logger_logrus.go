@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/Sirupsen/logrus/formatters/logstash"
 	"github.com/pkg/errors"
 )
 
@@ -20,8 +19,6 @@ func NewLogrusLogger(options Options) Logger {
 	switch options.LogFormat {
 	case "json":
 		backend.Formatter = &logrus.JSONFormatter{}
-	case "logstash":
-		backend.Formatter = &logstash.LogstashFormatter{}
 	default:
 		backend.Formatter = &logrus.TextFormatter{}
 	}

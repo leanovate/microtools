@@ -1,20 +1,20 @@
-PACKAGES=$(shell go list ./...)
+PACKAGES= ./logging/... ./rest/... ./routing/...
 VERSION = $(shell date -u +.%Y%m%d.%H%M%S)
 
 all: export GOPATH=${PWD}/../../../..
 all: format
 	@echo "--> Running go build"
-	@go build ./...
+	@go build ${PACKAGES}
 
 format: export GOPATH=${PWD}/../../../..
 format:
 	@echo "--> Running go fmt"
-	@go fmt ./...
+	@go fmt ${PACKAGES}
 
 test: export GOPATH=${PWD}/../../../..
 test:
 	@echo "--> Running tests"
-	@go test -v ./rest/... ./routing/... ./logging/...
+	@go test -v ${PACKAGES}
 
 coverage:
 	@echo "--> Running tests with coverage"
@@ -25,13 +25,13 @@ coverage:
   done
 	@rm .pkg.coverage
 
-godepssave:
-	@echo "--> Godeps save"
-	@go get github.com/tools/godep
-	@go build -v -o bin/godep github.com/tools/godep
-	@bin/godep save ./...
+glide.install:
+	@echo "--> glide install"
+	@go get github.com/Masterminds/glide
+	@go build -v -o bin/glide github.com/Masterminds/glide
+	@bin/glide install -v
 
 #genmocks:
 #	@echo "--> Generate mocks"
 #	@go build -v -o bin/mockgen github.com/golang/mock/mockgen
-#	bin/mockgen -destination=./routing/logger_mock_test.go -package routing_test github.com/leanovate/microtools/logging Logger 
+#	bin/mockgen -destination=./routing/logger_mock_test.go -package routing_test github.com/leanovate/microtools/logging Logger
