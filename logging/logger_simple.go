@@ -110,3 +110,12 @@ func (l *loggerSimple) WithContext(fields map[string]interface{}) Logger {
 		out:    l.out,
 	}
 }
+
+func (l *loggerSimple) WithField(name, value string) Logger {
+	prefix := fmt.Sprintf("%s %s=%s", l.logger.Prefix(), name, value)
+	return &loggerSimple{
+		logger: log.New(l.out, prefix, log.LstdFlags),
+		level:  l.level,
+		out:    l.out,
+	}
+}

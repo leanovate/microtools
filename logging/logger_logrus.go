@@ -121,3 +121,16 @@ func (l *logrusLogger) WithContext(fields map[string]interface{}) Logger {
 		fields: newFields,
 	}
 }
+
+func (l *logrusLogger) WithField(name, value string) Logger {
+	newFields := make(map[string]interface{}, 0)
+	for key, value := range l.fields {
+		newFields[key] = value
+	}
+	newFields[name] = value
+
+	return &logrusLogger{
+		logger: l.logger,
+		fields: newFields,
+	}
+}

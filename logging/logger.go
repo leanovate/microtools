@@ -20,6 +20,7 @@ type Logger interface {
 	Debug(args ...interface{})
 
 	WithContext(fields map[string]interface{}) Logger
+	WithField(name, value string) Logger
 }
 
 type Level int
