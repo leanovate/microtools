@@ -54,21 +54,26 @@ func (r *Result) Send(resp http.ResponseWriter, encoder ResponseEncoder) error {
 			resp.Header().Add(key, value)
 		}
 	}
-	switch r.Body.(type) {
+	switch body := r.Body.(type) {
 	case nil:
 		resp.WriteHeader(r.Status)
 		return nil
+	case io.ReadCloser:
+		resp.WriteHeader(r.Status)
+		defer body.Close()
+		_, err := io.Copy(resp, body)
+		return err
 	case io.Reader:
 		resp.WriteHeader(r.Status)
-		_, err := io.Copy(resp, r.Body.(io.Reader))
+		_, err := io.Copy(resp, body)
 		return err
 	case io.WriterTo:
 		resp.WriteHeader(r.Status)
-		_, err := (r.Body.(io.WriterTo)).WriteTo(resp)
+		_, err := body.WriteTo(resp)
 		return err
 	case []byte:
 		resp.WriteHeader(r.Status)
-		_, err := resp.Write(r.Body.([]byte))
+		_, err := resp.Write(body)
 		return err
 	default:
 		if resp.Header().Get("Content-Type") == "" {
