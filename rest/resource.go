@@ -10,6 +10,7 @@ type Resource interface {
 	BeforeFilter(resp http.ResponseWriter, req *http.Request) bool
 	Self() Link
 	Get(request *http.Request) (interface{}, error)
+	Post(request *http.Request) (interface{}, error)
 	Patch(request *http.Request) (interface{}, error)
 	Update(request *http.Request) (interface{}, error)
 	Delete(request *http.Request) (interface{}, error)
@@ -24,6 +25,10 @@ func (ResourceBase) BeforeFilter(resp http.ResponseWriter, req *http.Request) bo
 }
 
 func (ResourceBase) Get(request *http.Request) (interface{}, error) {
+	return nil, MethodNotAllowed
+}
+
+func (ResourceBase) Post(request *http.Request) (interface{}, error) {
 	return nil, MethodNotAllowed
 }
 
@@ -59,6 +64,7 @@ func ResourceMatcher(resource Resource) routing.Matcher {
 	return routing.Sequence(
 		routing.EndSeq(
 			routing.GET(restHandler{before: resource.BeforeFilter, handler: resource.Get}),
+			routing.POST(restHandler{before: resource.BeforeFilter, handler: resource.Post}),
 			routing.PUT(restHandler{before: resource.BeforeFilter, handler: resource.Update}),
 			routing.PATCH(restHandler{before: resource.BeforeFilter, handler: resource.Patch}),
 			routing.DELETE(restHandler{before: resource.BeforeFilter, handler: resource.Delete}),
