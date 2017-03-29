@@ -60,48 +60,55 @@ func WrapError(err error) *HTTPError {
 	case *HTTPError:
 		return err.(*HTTPError)
 	default:
-		return InternalServerError(err)
+		return HTTPInternalServerError(err)
 	}
 }
 
-// BadRequest is a HTTP bad request 400
-var BadRequest = &HTTPError{
+// HTTPBadRequest is a HTTP bad request 400
+var HTTPBadRequest = &HTTPError{
 	Code:    400,
 	Type:    "https://httpstatus.es/400",
 	Message: "Bad request",
 }
 
-var UnauthorizedError = &HTTPError{
+// HTTPUnauthorized is a HTTP Unauthorized 401
+var HTTPUnauthorized = &HTTPError{
 	Code:    401,
 	Type:    "https://httpstatus.es/401",
 	Message: "Unauthorized",
 }
 
-var Forbidden = &HTTPError{
+// HTTPForbidden is a HTTP forbidden 403
+var HTTPForbidden = &HTTPError{
 	Code:    403,
 	Type:    "https://httpstatus.es/403",
 	Message: "Forbidden",
 }
 
-var NotFound = &HTTPError{
+// HTTPNotFound is a HTTP not found 404
+var HTTPNotFound = &HTTPError{
 	Code:    404,
 	Type:    "https://httpstatus.es/404",
 	Message: "Not found",
 }
 
-var MethodNotAllowed = &HTTPError{
+// HTTPMethodNotAllowed is a HTTP method not allowed 405
+var HTTPMethodNotAllowed = &HTTPError{
 	Code:    405,
 	Type:    "https://httpstatus.es/405",
 	Message: "Method not allowed",
 }
 
-var Conflict = &HTTPError{
+// HTTPConflict is a HTTP conflict 409
+var HTTPConflict = &HTTPError{
 	Code:    409,
 	Type:    "https://httpstatus.es/409",
 	Message: "Conflict",
 }
 
-func InternalServerError(err error) *HTTPError {
+// HTTPInternalServerError wraps an arbitrary Error as
+// HTTP internal server error 500
+func HTTPInternalServerError(err error) *HTTPError {
 	return &HTTPError{
 		Code:    500,
 		Type:    "https://httpstatus.es/500",
