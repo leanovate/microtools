@@ -56,13 +56,14 @@ func (l *LoggingHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) 
 	elapsed := time.Since(start)
 	flowID := flowIDFromHeaders(req)
 	log := l.logger.WithContext(map[string]interface{}{
-		"method":  req.Method,
-		"uri":     req.RequestURI,
-		"status":  loggingResp.status,
-		"time":    elapsed.String(),
-		"millis":  float64(elapsed.Nanoseconds()) / 1000000.0,
-		"bytes":   loggingResp.responseBytes,
-		"flow_id": flowID,
+		"method":     req.Method,
+		"uri":        req.RequestURI,
+		"status":     loggingResp.status,
+		"time":       elapsed.String(),
+		"millis":     float64(elapsed.Nanoseconds()) / 1000000.0,
+		"bytes":      loggingResp.responseBytes,
+		"flow_id":    flowID,
+		"user_agent": req.Header.Get("User-Agent"),
 	})
 	if loggingResp.status < 300 {
 		log.Info("Request: Success")
