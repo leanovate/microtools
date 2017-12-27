@@ -16,6 +16,11 @@ type loggerSimple struct {
 	out    io.Writer
 }
 
+func init() {
+	RegisterBackend("simple", NewSimpleLogger)
+	RegisterBackend("null", NewSimpleLoggerNull)
+}
+
 // NewSimpleLogger creates a simple Logger based on the golang log package
 func NewSimpleLogger(options Options) Logger {
 	out := options.GetOutput()
@@ -29,7 +34,7 @@ func NewSimpleLogger(options Options) Logger {
 // NewSimpleLoggerNull create a simple Logger discarding all log entries (i.e.
 // /dev/null). Useful for testing where you do not want to polute testing
 // output with log messages.
-func NewSimpleLoggerNull() Logger {
+func NewSimpleLoggerNull(options Options) Logger {
 	return &loggerSimple{
 		logger: log.New(ioutil.Discard, "", log.LstdFlags),
 		level:  Fatal,
@@ -42,7 +47,7 @@ func (l *loggerSimple) ErrorErr(err error) {
 		switch richErr := err.(type) {
 		case fmt.Formatter:
 			l.logger.Printf("%+v", richErr)
-		case simpleStackTracer:
+		case SimpleStackTracer:
 			l.logger.Print(richErr.ErrorStack())
 		default:
 			wrapped := errors.Wrap(err, err.Error())
