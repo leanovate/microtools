@@ -1,6 +1,8 @@
 package routing
 
 import (
+	"bufio"
+	"net"
 	"net/http"
 	"time"
 
@@ -30,6 +32,10 @@ func (l *loggingResponseWriter) Write(bytes []byte) (int, error) {
 func (l *loggingResponseWriter) WriteHeader(status int) {
 	l.status = status
 	l.underlying.WriteHeader(status)
+}
+
+func (l *loggingResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	return l.underlying.(http.Hijacker).Hijack()
 }
 
 // LoggingHandler is a http.Handler that logs and delegates all requests.
