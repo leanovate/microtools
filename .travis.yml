@@ -1,7 +1,7 @@
 sudo: false
 language: go
 go:
-- 1.10
+- 1.9
 script: make all coverage
 before_install:
   - pip install --user codecov
