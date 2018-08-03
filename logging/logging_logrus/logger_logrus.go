@@ -3,9 +3,9 @@ package logging_logrus
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/leanovate/microtools/logging"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type logrusLogger struct {

@@ -20,7 +20,7 @@
 #  version = "2.4.0"
 
 required = [
-    "github.com/Sirupsen/logrus",
+    "github.com/sirupsen/logrus",
     "github.com/pkg/errors",
     "github.com/smartystreets/goconvey",
     "github.com/golang/mock/gomock",

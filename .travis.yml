@@ -2,7 +2,7 @@ sudo: false
 language: go
 go:
 - 1.9
-script: make all coverage
+script: make dep.ensure all coverage
 before_install:
   - pip install --user codecov
 after_success:
